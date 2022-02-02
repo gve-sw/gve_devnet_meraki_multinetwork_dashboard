@@ -1,0 +1,74 @@
+<!-- Template page: This settings page offers various input field to gather settings information -->
+
+{% extends "masterPage.html" %}
+
+{% block content %}
+<div class="row">
+        
+        <!-- Left Rail -->
+        <!-- Menu element-->
+        <div class="col-2">
+
+        </div>
+
+        <!-- Middle Rail -->
+        <div class="col-8">
+            <div class="section" >
+                <div class="panel panel--loose panel--raised base-margin-bottom">
+                    <h2 class="subtitle">Clients</h2>
+                    <hr>
+                    
+                        <div class="section"> 
+                                                                                             
+                                <form action="/" method="POST" name="envVars"> 
+                                    <div style="margin-top: 0px;" class="form-group base-margin-bottom" id="networks-select">
+                                        <table id="networks" class="table table--lined table--selectable" aria-label="Selectable rows table example">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Name</th>
+                                                        <th>Client ID</th>
+                                                        <th>Network</th>
+                                                        <th>User</th>
+                                                        <th>Last seen</th>
+                                                        <th>Device type</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for c in clients %}
+                                                    <tr>
+                                                        <td><a href="/client?id={{c.id}}&network={{c.networkid}}&ap={{c.ap}}">{{c.name}}</a></td>
+                                                        <td>{{c.id}}</td>
+                                                        <td>{{c.network}}</td>
+                                                        <td>{{c.user}}</td>
+                                                        <td>{{c.lastSeen}}</td>
+                                                        <td>{{c.vendor}}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                    </div>
+                                    
+                                <form action="/settings" method="POST" name="envVars"> 
+                            
+                            <!--CUSTOMIZE END-->
+                        
+                            <!-- Button area-->
+                            
+
+                        </div> 
+
+                    </form>
+                    
+                    <!--Alert for error message-->
+                        <!--PASS INFO: Pass the following information to the template: error=True/False ; errormessage="xxx" ; errorcode=xxx-->
+                        {% include "alert.html" %}
+
+                </div>
+            </div>
+        </div>
+
+    <!-- Right Rail -->
+    <div class="col-0 col-xl-3 col-md-3">
+    </div>
+</div>
+{%  endblock %}

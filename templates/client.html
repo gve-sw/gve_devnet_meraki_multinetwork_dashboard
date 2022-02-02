@@ -1,0 +1,272 @@
+<!-- Template page: This settings page offers various input field to gather settings information -->
+
+{% extends "masterPage.html" %}
+
+{% block content %}
+<div class="row">
+        
+        <!-- Left Rail -->
+        <!-- Menu element-->
+        <div class="col-2">
+
+        </div>
+
+        <!-- Middle Rail -->
+        <div class="col-8">
+            <div class="section">
+                <div class="panel panel--loose panel--raised base-margin-bottom">
+                    <div class="section" style="padding: 20px;">
+                    <h2>Client information for: {{client.description}}</h2>
+                    <hr>
+                        <div class="section">
+                            <h3 class="subtitle">Client Details</h3>                                                          
+                                    <div style="margin-top: 0px;" class="form-group base-margin-bottom" id="networks-select">
+                                        <table id="networks" class="table table--lined table--selectable" aria-label="Selectable rows table example">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Client Name</th>
+                                                        <th>MAC Address</th>
+                                                        <th>IP Address</th>
+                                                        <th>Device Type</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>{{client.description}}</td>
+                                                        <td>{{client.mac}}</td>
+                                                        <td>{{client.ip}}</td>
+                                                        <td>{{client.manufacturer}}</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                    </div>
+                        </div> 
+
+                        <div class="section">
+                            <h3 class="subtitle">Most Recent Connection Details</h3>                                                          
+                                    <div style="margin-top: 0px;" class="form-group base-margin-bottom" id="networks-select">
+                                        <table id="networks" class="table table--lined table--selectable" aria-label="Selectable rows table example">
+                                                <thead>
+                                                    <tr>
+                                                        <th>AP Name</th>
+                                                        <th>Network</th>
+                                                        <th>First Seen</th>
+                                                        <th>Last Seen</th>
+                                                        <th>MAC Address</th>
+                                                        <th>Serial Number</th>
+                                                        <th>Device Model</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for conn in connections %}
+                                                    <tr>
+                                                        <td>{{conn.name}}</td>
+                                                        <td>{{conn.network}}</td>
+                                                        <td>{{conn.firstSeen}}</td>
+                                                        <td>{{conn.lastSeen}}</td>
+                                                        <td>{{conn.mac}}</td>
+                                                        <td>{{conn.serial}}</td>
+                                                        <td>{{conn.model}}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                    </div>
+                        </div> 
+
+                        <div class="section">
+                            <h3 class="subtitle">Usage History</h3>                                                          
+                                    <!-- <div style="margin-top: 0px;" class="form-group base-margin-bottom" id="networks-select">
+                                        <table id="networks" class="table table--lined table--selectable" aria-label="Selectable rows table example">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Time</th>
+                                                        <th>Data Received (in kb)</th>
+                                                        <th>Data Sent (in kb)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for u in usage %}
+                                                    <tr>
+                                                        <td>{{u.ts}}</td>
+                                                        <td>{{u.received}}</td>
+                                                        <td>{{u.sent}}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                    </div> -->
+
+                                <canvas id="myChart1"></canvas>
+                                <canvas id="myChart2" style="margin-top: 20px;"></canvas>
+                                <script>
+                                function drawChart(usage, chartId, key, title){
+                                    var ctx = document.getElementById(chartId).getContext('2d');
+                                    function unpack(dictionary, key) {
+                                        console.log(dictionary)
+                                        var regex = new RegExp('&#39;', 'g');
+                                        var str = dictionary.replace(regex, '\"');
+                                        var regex = new RegExp('None', 'g');
+                                        var str = str.replace(regex, 0);
+                                        console.log(str)
+                                        result = JSON.parse(str).map(function(r) {
+                                                var keyvalue = r[key]
+                                                if (key == "ts") {
+                                                    var index = keyvalue.indexOf('T')
+                                                    return keyvalue.slice(0, index)
+                                                }
+                                                return keyvalue
+                                        })
+                                        console.log(result)
+                                        
+                                        return result
+                                    }
+                                    var myChart = new Chart(ctx, {
+                                        type: 'line',
+                                        data: {
+                                            labels: unpack(usage, "ts"),
+                                            datasets: [{
+                                            label: title,
+                                            data: unpack(usage, key),
+                                            backgroundColor: 'rgba(103, 179, 70, 0.2)',
+                                            borderColor: 'rgba(103, 179, 70, 1)',
+                                            fill:true,
+                                            borderWidth:1
+                                        }]
+                                        },
+                                        options: {
+                                            scales: {
+                                                yAxes: [{
+                                                    ticks: {
+                                                        beginAtZero: true
+                                                    }
+                                                }]
+                                            }
+                                        }
+                                        });
+                                }
+                                drawChart("{{ usage }}", "myChart1", "sent", "Data sent (in kb)")
+                                drawChart("{{ usage }}", "myChart2", "received", "Data received (in kb)")
+                                </script>
+                        </div> 
+
+                        <!-- <div class="section">
+                            <h3 class="subtitle">Usage History Per Application</h3>                                                          
+                                    <div style="margin-top: 0px;" class="form-group base-margin-bottom" id="networks-select">
+                                        <table id="networks" class="table table--lined table--selectable" aria-label="Selectable rows table example">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Time</th>
+                                                        <th>Data Received (in kb)</th>
+                                                        <th>Data Sent (in kb)</th>
+                                                        <th>Active Seconds</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for t in traffic %}
+                                                    <tr>
+                                                        <td>{{t.ts}}</td>
+                                                        <td>{{t.recv}}</td>
+                                                        <td>{{t.sent}}</td>
+                                                        <td>{{t.activeSeconds}}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                    </div>
+
+                                    <canvas id="myChart3"></canvas>
+                                    <canvas id="myChart4" style="margin-top: 20px;"></canvas>
+                                    <script>
+                                        drawChart("{{ traffic }}", "myChart3", "recv", "Data received (in kb)")
+                                        drawChart("{{ traffic }}", "myChart4", "sent", "Data sent (in kb)")
+                                    </script>
+                        </div>  -->
+
+                        <div class="section">
+                            <h3 class="subtitle">Usage Per Application</h3>                                                          
+                                    <div style="margin-top: 0px;" class="form-group base-margin-bottom" id="networks-select">
+                                        <table id="networks" class="table table--lined table--selectable" aria-label="Selectable rows table example">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Application</th>
+                                                        <th>Data Received (in kb)</th>
+                                                        <th>Data Sent (in kb)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for a in app %}
+                                                    <tr>
+                                                        <td>{{a.application}}</td>
+                                                        <td>{{a.received}}</td>
+                                                        <td>{{a.sent}}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                    </div>
+                                
+                                    <canvas id="myChart3"></canvas>
+                                    <script>
+                                    function drawBarChart(usage, chartId){
+                                        var ctx = document.getElementById(chartId).getContext('2d');
+                                        function unpack(dictionary, key) {
+                                            console.log(dictionary)
+                                            var regex = new RegExp('&#39;', 'g');
+                                            var str = dictionary.replace(regex, '\"');
+                                            var regex = new RegExp('None', 'g');
+                                            var str = str.replace(regex, 0);
+                                            console.log(str)
+                                            result = JSON.parse(str).map(function(r) {
+                                                    var keyvalue = r[key]
+                                                    if (key == "ts") {
+                                                        var index = keyvalue.indexOf('T')
+                                                        return keyvalue.slice(0, index)
+                                                    }
+                                                    return keyvalue
+                                            })
+                                            console.log(result)
+                                            
+                                            return result
+                                        }
+                                        var myChart = new Chart(ctx, {
+                                            type: 'bar',
+                                            data: {
+                                                labels: unpack(usage, 'application'),
+                                                datasets: [{
+                                                    label: "Data sent (in kb)",
+                                                    data: unpack(usage, 'sent'),
+                                                    backgroundColor: 'rgba(103, 179, 70, 0.2)',
+                                                    borderColor: 'rgba(103, 179, 70, 1)',
+                                                    borderWidth: 1
+                                                },{
+                                                    label: "Data received (in kb)",
+                                                    data: unpack(usage, 'received'),
+                                                    borderWidth: 1
+                                                }]
+                                            },
+                                            options: {
+                                                scales: {
+                                                    yAxes: [{
+                                                        ticks: {
+                                                            beginAtZero: false
+                                                        }
+                                                    }]
+                                                }
+                                            }
+                                            });
+                                    }
+                                    drawBarChart("{{ app }}", "myChart3")
+                                    </script>
+                        </div> 
+
+                </div>
+            </div>
+        </div>
+        </div>
+
+    <!-- Right Rail -->
+    <div class="col-0 col-xl-3 col-md-3">
+    </div>
+</div>
+{%  endblock %}
